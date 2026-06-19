@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  username  String     @unique
+  password  String
+  role      Role       @default(JOUEUR)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  sessions  Session[]
+  videos    Video[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("videos")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  JOUEUR
+}
